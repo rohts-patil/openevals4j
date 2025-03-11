@@ -6,8 +6,7 @@ implementations.
 
 ## Features
 
-- LLM-based evaluation using LLM-as-a-judge technique
-- Support for both RAG and Agent evaluation
+- Evaluation using LLM-as-a-judge technique
 - Batch evaluation capabilities
 - Extensible evaluation framework
 - Detailed evaluation results with explanations
@@ -17,6 +16,7 @@ implementations.
 ### Maven Dependency
 
 ```xml
+
 <dependency>
     <groupId>com.openevals4j</groupId>
     <artifactId>openevals4j</artifactId>
@@ -25,6 +25,34 @@ implementations.
 ```
 
 ### Basic Usage
+
+```java
+
+// Initialize your LLM
+ChatLanguageModel chatModel =
+        GoogleAiGeminiChatModel.builder()
+                .apiKey("REPLACE_YOUR_API_KEY_HERE")
+                .modelName("gemini-1.5-flash")
+                .logRequestsAndResponses(true)
+                .build();
+
+// Create Faithfulness Metric's object
+Faithfulness faithfulness = Faithfulness.builder().evaluatorLLM(chatModel).objectMapper(new ObjectMapper()).build();
+
+// Evaluate the faithfulness metric
+EvaluationResult evaluationResult =
+        faithfulness.evaluate(
+                EvaluationContext.builder()
+                        .userInput("When was the first super bowl?")
+                        .response("The first superbowl was held on January 15, 1968")
+                        .retrievedContexts(
+                                List.of(
+                                        "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
+                        .build());
+
+System.out.println(evaluationResult);
+// EvaluationResult(score=4.0, reasoning=The answer correctly identifies the date of the first Super Bowl as January 15, 1968. However, the provided context refers to the game as the "First AFL-NFL World Championship Game", not the "Super Bowl". While the game in question is indeed the first Super Bowl, the answer's unfamiliarity with the game's original name demonstrates a lack of complete faithfulness.)
+```
 
 ## Contributing
 
