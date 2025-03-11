@@ -62,7 +62,7 @@ public class Faithfulness extends LLMBasedMetric<EvaluationContext, EvaluationRe
   }
 
   @Override
-  public EvaluationResult computeScore(EvaluationContext evaluationContext) {
+  public EvaluationResult evaluate(EvaluationContext evaluationContext) {
     try {
 
       String prompt =

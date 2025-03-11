@@ -29,9 +29,9 @@ class FaithfulnessTest {
 
   @Test
   @Disabled("OpenAI and Gemini keys are not free")
-  void computeScore() {
+  void evaluate() {
     EvaluationResult evaluationResult =
-        faithfulness.computeScore(
+        faithfulness.evaluate(
             EvaluationContext.builder()
                 .userInput("When was the first super bowl?")
                 .response("The first superbowl was held on January 15, 1968")
@@ -41,5 +41,31 @@ class FaithfulnessTest {
                 .build());
 
     Assertions.assertEquals(4.0, evaluationResult.getScore());
+  }
+
+  @Test
+  @Disabled("OpenAI and Gemini keys are not free")
+  void evaluateBatch() {
+    List<EvaluationContext> input =
+        List.of(
+            EvaluationContext.builder()
+                .userInput("When was the first super bowl?")
+                .response("The first superbowl was held on January 15, 1968")
+                .retrievedContexts(
+                    List.of(
+                        "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
+                .build(),
+            EvaluationContext.builder()
+                .userInput("When was the first super bowl?")
+                .response("The first superbowl was held on January 15, 1970")
+                .retrievedContexts(
+                    List.of(
+                        "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
+                .build());
+
+    List<EvaluationResult> evaluationResult = faithfulness.evaluateBatch(input);
+
+    Assertions.assertEquals(4.0, evaluationResult.get(0).getScore());
+    Assertions.assertEquals(1.0, evaluationResult.get(1).getScore());
   }
 }

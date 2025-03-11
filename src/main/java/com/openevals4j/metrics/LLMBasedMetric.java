@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -31,8 +32,13 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
   }
 
   @Override
-  public V computeScore(K input) {
+  public V evaluate(K input) {
     return null;
+  }
+
+  @Override
+  public List<V> evaluateBatch(List<K> inputs) {
+    return inputs.stream().map(this::evaluate).toList();
   }
 
   protected ChatRequest buildChatRequest(String prompt) {

@@ -6,7 +6,7 @@ implementations.
 
 ## Features
 
-- LLM-based evaluation using LangChain4J
+- LLM-based evaluation using LLM-as-a-judge technique
 - Support for both RAG and Agent evaluation
 - Batch evaluation capabilities
 - Extensible evaluation framework
@@ -17,7 +17,6 @@ implementations.
 ### Maven Dependency
 
 ```xml
-
 <dependency>
     <groupId>com.openevals4j</groupId>
     <artifactId>openevals4j</artifactId>
