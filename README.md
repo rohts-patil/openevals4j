@@ -1,25 +1,23 @@
 # OpenEvals4J
 
-A Java library for evaluating Large Language Models (LLMs) applications, inspired by the OpenEvals project. This library provides a foundation for creating custom evaluation frameworks for your LLM applications.
+OpenEvals4J is a Java library for evaluating RAG (Retrieval-Augmented Generation) systems and AI agents using LLM as
+judge. It provides a flexible and extensible framework for assessing the performance of your RAG and agent
+implementations.
 
 ## Features
 
-- Base evaluation framework for LLM applications
-- Support for custom evaluation metrics
-- Easy integration with existing Java applications
-- Java 17 compatibility
-- Maven-based project structure
+- LLM-based evaluation using LangChain4J
+- Support for both RAG and Agent evaluation
+- Batch evaluation capabilities
+- Extensible evaluation framework
+- Detailed evaluation results with explanations
 
-## Requirements
+## Getting Started
 
-- Java 17 or higher
-- Maven 3.6 or higher
-
-## Installation
-
-Add the following dependency to your `pom.xml`:
+### Maven Dependency
 
 ```xml
+
 <dependency>
     <groupId>com.openevals4j</groupId>
     <artifactId>openevals4j</artifactId>
@@ -27,39 +25,7 @@ Add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-## Usage
-
-### Basic Example
-
-```java
-import com.github.openevals4j.eval.Evaluator;
-import com.github.openevals4j.eval.metrics.AccuracyMetric;
-
-// Create an evaluator
-Evaluator evaluator = new Evaluator();
-
-// Add evaluation metrics
-evaluator.addMetric(new AccuracyMetric());
-
-// Run evaluation
-EvaluationResult result = evaluator.evaluate(testCases);
-```
-
-### Creating Custom Metrics
-
-```java
-import com.github.openevals4j.eval.metrics.Metric;
-
-public class CustomMetric implements Metric {
-    @Override
-    public double evaluate(TestCase testCase) {
-        // Implement your custom evaluation logic
-        return score;
-    }
-}
-```
-
-
+### Basic Usage
 
 ## Contributing
 
