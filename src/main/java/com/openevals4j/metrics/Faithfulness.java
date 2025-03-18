@@ -70,9 +70,9 @@ public class Faithfulness extends LLMBasedMetric<EvaluationContext, EvaluationRe
               FAITHFULNESS_EVALUATION_PROMPT,
               evaluationContext.getRetrievedContexts(),
               evaluationContext.getUserInput(),
-              evaluationContext.getResponse());
+              evaluationContext.getActualResponse());
 
-      ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt));
+      ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
 
       return getObjectMapper().readValue(output.aiMessage().text(), EvaluationResult.class);
 
@@ -80,9 +80,6 @@ public class Faithfulness extends LLMBasedMetric<EvaluationContext, EvaluationRe
       // TODO : log exception
     }
 
-    return EvaluationResult.builder()
-        .score(Double.NaN)
-        .reasoning(String.format("Error while evaluating %s metric", getMetricName()))
-        .build();
+    return getDefaultEvaluationResult();
   }
 }

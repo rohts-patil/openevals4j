@@ -3,6 +3,7 @@ package com.openevals4j.metrics;
 import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openevals4j.metrics.context.EvaluationResult;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -28,7 +29,7 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
     this.metricName = metricName;
     this.evaluatorLLM = evaluatorLLM;
     this.objectMapper = objectMapper;
-    this.responseFormat = buildResponseFormat();
+    this.responseFormat = buildResponseFormatForScoreAndReasoning();
   }
 
   @Override
@@ -41,14 +42,14 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
     return inputs.stream().map(this::evaluate).toList();
   }
 
-  protected ChatRequest buildChatRequest(String prompt) {
+  protected ChatRequest buildChatRequest(String prompt, ResponseFormat responseFormat) {
     return ChatRequest.builder()
-        .responseFormat(getResponseFormat())
+        .responseFormat(responseFormat)
         .messages(UserMessage.from(prompt))
         .build();
   }
 
-  private ResponseFormat buildResponseFormat() {
+  protected ResponseFormat buildResponseFormatForScoreAndReasoning() {
     return ResponseFormat.builder()
         .type(JSON)
         .jsonSchema(
@@ -61,6 +62,13 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
                         .required("reasoning", "score")
                         .build())
                 .build())
+        .build();
+  }
+
+  protected EvaluationResult getDefaultEvaluationResult() {
+    return EvaluationResult.builder()
+        .score(Double.NaN)
+        .reasoning(String.format("Error while evaluating %s metric", getMetricName()))
         .build();
   }
 }

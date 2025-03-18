@@ -34,7 +34,7 @@ class FaithfulnessTest {
         faithfulness.evaluate(
             EvaluationContext.builder()
                 .userInput("When was the first super bowl?")
-                .response("The first superbowl was held on January 15, 1968")
+                .actualResponse("The first superbowl was held on January 15, 1968")
                 .retrievedContexts(
                     List.of(
                         "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
@@ -50,14 +50,14 @@ class FaithfulnessTest {
         List.of(
             EvaluationContext.builder()
                 .userInput("When was the first super bowl?")
-                .response("The first superbowl was held on January 15, 1968")
+                .actualResponse("The first superbowl was held on January 15, 1968")
                 .retrievedContexts(
                     List.of(
                         "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
                 .build(),
             EvaluationContext.builder()
                 .userInput("When was the first super bowl?")
-                .response("The first superbowl was held on January 15, 1970")
+                .actualResponse("The first superbowl was held on January 15, 1970")
                 .retrievedContexts(
                     List.of(
                         "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
