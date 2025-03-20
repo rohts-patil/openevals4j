@@ -8,6 +8,7 @@ import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ContextualPrecisionMetricTest {
@@ -30,6 +31,7 @@ class ContextualPrecisionMetricTest {
   }
 
   @Test
+  @Disabled("OpenAI and Gemini keys are not free")
   void evaluate() {
     EvaluationResult evaluationResult =
         contextualPrecisionMetric.evaluate(
@@ -42,6 +44,6 @@ class ContextualPrecisionMetricTest {
                         "All customers are eligible for a 30 day full refund at no extra cost."))
                 .build());
 
-    Assertions.assertEquals(4.0, evaluationResult.getScore());
+    Assertions.assertEquals(1.0, evaluationResult.getScore());
   }
 }
