@@ -2,12 +2,14 @@ package com.openevals4j.metrics.contextualprecision;
 
 public class ContextualPrecisionPromptConstants {
 
+  private ContextualPrecisionPromptConstants() {}
+
   public static final String VERDICT_GENERATION_PROMPT =
       """
                     Given the input, expected output, and retrieval context, please generate a list of JSON objects to determine whether each node in the retrieval context was remotely useful in arriving at the expected output.
 
                     **
-                    IMPORTANT: Please make sure to only return in JSON format, with the 'verdicts' key as a list of JSON. These JSON only contain the `verdict` key that outputs only 'yes' or 'no', and a `reason` key to justify the verdict. In your reason, you should aim to quote parts of the context.
+                    IMPORTANT: Please make sure to only return in JSON format. These JSON only contain the `verdict` key that outputs only 'yes' or 'no', and a `reason` key to justify the verdict. In your reason, you should aim to quote parts of the context.
                     Example Retrieval Context: ["Einstein won the Nobel Prize for his discovery of the photoelectric effect", "He won the Nobel Prize in 1968.", "There was a cat."]
                     Example Input: "Who won the Nobel Prize in 1968 and for what?"
                     Example Expected Output: "Einstein won the Nobel Prize in 1968 for his discovery of the photoelectric effect."
