@@ -57,7 +57,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
     String prompt =
         String.format(
-            ContextPrecisionPromptConstants.REASON_GENERATION_PROMPT,
+            ContextualPrecisionPromptConstants.REASON_GENERATION_PROMPT,
             score,
             input,
             retrievalContextsVerdicts);
@@ -123,7 +123,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
             + (retrievalContext.size() > 1 ? "s" : "")
             + ")";
     return String.format(
-        ContextPrecisionPromptConstants.VERDICT_GENERATION_PROMPT,
+        ContextualPrecisionPromptConstants.VERDICT_GENERATION_PROMPT,
         input,
         expectedOutput,
         documentCountStr,

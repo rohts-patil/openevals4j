@@ -1,6 +1,6 @@
 package com.openevals4j.metrics.contextualprecision;
 
-public class ContextPrecisionPromptConstants {
+public class ContextualPrecisionPromptConstants {
 
   public static final String VERDICT_GENERATION_PROMPT =
       """
