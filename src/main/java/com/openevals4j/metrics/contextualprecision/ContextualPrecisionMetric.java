@@ -7,6 +7,7 @@ import com.openevals4j.metrics.Constants;
 import com.openevals4j.metrics.LLMBasedMetric;
 import com.openevals4j.metrics.context.EvaluationContext;
 import com.openevals4j.metrics.context.EvaluationResult;
+import com.openevals4j.metrics.context.VerdictWithReason;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -27,7 +28,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
   @Override
   public EvaluationResult evaluate(EvaluationContext evaluationContext) {
     try {
-      List<ContextualPrecisionVerdict> verdicts =
+      List<VerdictWithReason> verdicts =
           generateVerdicts(
               evaluationContext.getUserInput(),
               evaluationContext.getExpectedResponse(),
@@ -41,7 +42,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
   }
 
   private String generateReason(
-      String input, double score, List<ContextualPrecisionVerdict> verdicts)
+      String input, double score, List<VerdictWithReason> verdicts)
       throws JsonProcessingException {
     List<Map<String, String>> retrievalContextsVerdicts =
         verdicts.stream()
@@ -68,7 +69,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
     return extractReason(content);
   }
 
-  private List<ContextualPrecisionVerdict> generateVerdicts(
+  private List<VerdictWithReason> generateVerdicts(
       String input, String expectedOutput, List<String> retrievalContext)
       throws JsonProcessingException {
 
@@ -85,14 +86,14 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
     return (String) getObjectMapper().readValue(jsonString, Map.class).get("reason");
   }
 
-  private double calculateScore(List<ContextualPrecisionVerdict> verdicts) {
+  private double calculateScore(List<VerdictWithReason> verdicts) {
     int numberOfVerdicts = verdicts.size();
     if (numberOfVerdicts == 0) {
       return 0;
     }
 
     List<Integer> nodeVerdicts = new ArrayList<>();
-    for (ContextualPrecisionVerdict verdict : verdicts) {
+    for (VerdictWithReason verdict : verdicts) {
       nodeVerdicts.add(verdict.getVerdict().trim().equalsIgnoreCase("yes") ? 1 : 0);
     }
 

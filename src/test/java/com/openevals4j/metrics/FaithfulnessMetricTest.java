@@ -3,6 +3,7 @@ package com.openevals4j.metrics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.context.EvaluationContext;
 import com.openevals4j.metrics.context.EvaluationResult;
+import com.openevals4j.metrics.faithfulness.FaithfulnessMetric;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import java.util.List;
@@ -11,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-class FaithfulnessTest {
+class FaithfulnessMetricTest {
 
-  private Faithfulness faithfulness;
+  private FaithfulnessMetric faithfulnessMetric;
 
   @BeforeEach
   void setUp() {
@@ -23,15 +24,15 @@ class FaithfulnessTest {
             .modelName("gemini-1.5-flash")
             .logRequestsAndResponses(true)
             .build();
-    faithfulness =
-        Faithfulness.builder().evaluatorLLM(chatModel).objectMapper(new ObjectMapper()).build();
+    faithfulnessMetric =
+        FaithfulnessMetric.builder().evaluatorLLM(chatModel).objectMapper(new ObjectMapper()).build();
   }
 
   @Test
   @Disabled("OpenAI and Gemini keys are not free")
   void evaluate() {
     EvaluationResult evaluationResult =
-        faithfulness.evaluate(
+        faithfulnessMetric.evaluate(
             EvaluationContext.builder()
                 .userInput("When was the first super bowl?")
                 .actualResponse("The first superbowl was held on January 15, 1968")
@@ -63,7 +64,7 @@ class FaithfulnessTest {
                         "The First AFL–NFL World Championship Game was an American football game played on January 15, 1968, at the Los Angeles Memorial Coliseum in Los Angeles."))
                 .build());
 
-    List<EvaluationResult> evaluationResult = faithfulness.evaluateBatch(input);
+    List<EvaluationResult> evaluationResult = faithfulnessMetric.evaluateBatch(input);
 
     Assertions.assertEquals(4.0, evaluationResult.get(0).getScore());
     Assertions.assertEquals(1.0, evaluationResult.get(1).getScore());

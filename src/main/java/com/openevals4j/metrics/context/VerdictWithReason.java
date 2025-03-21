@@ -1,4 +1,4 @@
-package com.openevals4j.metrics.contextualprecision;
+package com.openevals4j.metrics.context;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ContextualPrecisionVerdict {
+public class VerdictWithReason {
   private String verdict;
   private String reason;
 }
