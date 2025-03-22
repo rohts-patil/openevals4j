@@ -1,8 +1,8 @@
 package com.openevals4j.metrics.contextualprecision;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openevals4j.metrics.context.EvaluationContext;
-import com.openevals4j.metrics.context.EvaluationResult;
+import com.openevals4j.metrics.models.EvaluationContext;
+import com.openevals4j.metrics.models.EvaluationResult;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import java.util.List;

@@ -3,7 +3,12 @@ package com.openevals4j.metrics;
 import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openevals4j.metrics.context.EvaluationResult;
+import com.openevals4j.metrics.exception.EvaluationContextValidationException;
+import com.openevals4j.metrics.models.EvaluationContext;
+import com.openevals4j.metrics.models.EvaluationResult;
+import com.openevals4j.metrics.models.ValidationProfile;
+import com.openevals4j.metrics.models.ValidationResult;
+import com.openevals4j.metrics.utils.EvaluationContextValidator;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -70,5 +75,17 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
         .score(Double.NaN)
         .reasoning(String.format("Error while evaluating %s metric", getMetricName()))
         .build();
+  }
+
+  protected void validateEvaluationContext(EvaluationContext evaluationContext) {
+    ValidationResult result =
+        EvaluationContextValidator.validate(evaluationContext, getValidationProfile());
+    if (!result.isValid()) {
+      throw new EvaluationContextValidationException(result);
+    }
+  }
+
+  protected ValidationProfile getValidationProfile() {
+    return null;
   }
 }

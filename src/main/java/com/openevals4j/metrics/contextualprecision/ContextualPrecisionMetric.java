@@ -5,9 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.Constants;
 import com.openevals4j.metrics.LLMBasedMetric;
-import com.openevals4j.metrics.context.EvaluationContext;
-import com.openevals4j.metrics.context.EvaluationResult;
-import com.openevals4j.metrics.context.VerdictWithReason;
+import com.openevals4j.metrics.models.EvaluationContext;
+import com.openevals4j.metrics.models.EvaluationResult;
+import com.openevals4j.metrics.models.ValidationProfile;
+import com.openevals4j.metrics.models.VerdictWithReason;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -27,6 +28,8 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
   @Override
   public EvaluationResult evaluate(EvaluationContext evaluationContext) {
+    validateEvaluationContext(evaluationContext);
+
     try {
       List<VerdictWithReason> verdicts =
           generateVerdicts(
@@ -41,8 +44,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
     }
   }
 
-  private String generateReason(
-      String input, double score, List<VerdictWithReason> verdicts)
+  private String generateReason(String input, double score, List<VerdictWithReason> verdicts)
       throws JsonProcessingException {
     List<Map<String, String>> retrievalContextsVerdicts =
         verdicts.stream()
@@ -94,7 +96,8 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
     List<Integer> nodeVerdicts = new ArrayList<>();
     for (VerdictWithReason verdict : verdicts) {
-      nodeVerdicts.add(verdict.getVerdict().trim().equalsIgnoreCase("yes") ? 1 : 0);
+      nodeVerdicts.add(
+          Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim()) ? 1 : 0);
     }
 
     double sumWeightedPrecisionAtK = 0.0;
@@ -128,5 +131,10 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
         expectedOutput,
         documentCountStr,
         retrievalContext);
+  }
+
+  @Override
+  protected ValidationProfile getValidationProfile() {
+    return ValidationProfile.CONTEXTUAL_PRECISION;
   }
 }

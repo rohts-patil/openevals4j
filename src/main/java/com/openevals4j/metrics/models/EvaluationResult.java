@@ -1,4 +1,4 @@
-package com.openevals4j.metrics.context;
+package com.openevals4j.metrics.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
