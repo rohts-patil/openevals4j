@@ -37,7 +37,7 @@ ChatLanguageModel chatModel =
                 .build();
 
 // Create Faithfulness Metric's object
-Faithfulness faithfulness = Faithfulness.builder().evaluatorLLM(chatModel).objectMapper(new ObjectMapper()).build();
+FaithfulnessMetric faithfulness = Faithfulness.builder().evaluatorLLM(chatModel).objectMapper(new ObjectMapper()).build();
 
 // Evaluate the faithfulness metric
 EvaluationResult evaluationResult =
