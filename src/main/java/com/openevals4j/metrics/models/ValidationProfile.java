@@ -1,8 +1,7 @@
 package com.openevals4j.metrics.models;
 
-import lombok.Getter;
-
 import java.util.List;
+import lombok.Getter;
 
 /** Enum representing predefined validation profiles for common use cases */
 @Getter
@@ -19,7 +18,10 @@ public enum ValidationProfile {
           "actualResponse",
           "expectedResponse",
           "retrievedContexts",
-          "referenceContexts"));
+          "referenceContexts")),
+  RUBRICS_BASED(
+      "rubricsBasedProfile",
+      List.of("userInput", "actualResponse"));
 
   private final String profileName;
   private final List<String> requiredFields;
