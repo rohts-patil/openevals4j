@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.Constants;
 import com.openevals4j.metrics.LLMBasedMetric;
+import com.openevals4j.metrics.MetricName;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
-import com.openevals4j.metrics.models.ValidationProfile;
 import com.openevals4j.metrics.models.VerdictWithReason;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -22,7 +22,7 @@ public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, Ev
 
   @Builder
   public ContextualRecallMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
-    super("Contextual Recall", evaluatorLLM, objectMapper);
+    super(MetricName.CONTEXTUAL_RECALL, evaluatorLLM, objectMapper);
   }
 
   @Override
@@ -107,7 +107,7 @@ public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, Ev
   }
 
   @Override
-  protected ValidationProfile getValidationProfile() {
-    return ValidationProfile.CONTEXTUAL_RECALL;
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("expectedResponse", "retrievedContexts");
   }
 }

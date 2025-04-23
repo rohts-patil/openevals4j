@@ -5,7 +5,7 @@ public class ContextualRecallPromptConstants {
   private ContextualRecallPromptConstants() {}
 
   public static final String VERDICT_GENERATION_PROMPT =
-      """
+"""
 For EACH sentence in the given expected output below, determine whether the sentence can be attributed to the nodes of retrieval contexts. Please generate a list of JSON with two keys: `verdict` and `reason`.
 The `verdict` key should STRICTLY be either a 'yes' or 'no'. Answer 'yes' if the sentence can be attributed to any parts of the retrieval context, else answer 'no'.
 The `reason` key should provide a reason why to the verdict. In the reason, you should aim to include the node(s) count in the retrieval context (eg., 1st node, and 2nd node in the retrieval context) that is attributed to said sentence.
@@ -39,7 +39,7 @@ JSON:
 """;
 
   public static final String REASON_GENERATION_PROMPT =
-      """
+"""
 Given the original expected output, a list of supportive reasons, and a list of unsupportive reasons (which are deduced directly from the 'expected output'), and a contextual recall score (closer to 1 the better), summarize a CONCISE reason for the score.
 A supportive reason is the reason why a certain sentence in the original expected output can be attributed to the node in the retrieval context.
 An unsupportive reason is the reason why a certain sentence in the original expected output cannot be attributed to anything in the retrieval context.

@@ -6,14 +6,13 @@ import com.openevals4j.metrics.models.EvaluationResult;
 import com.openevals4j.metrics.rubrics.models.RubricCriterion;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 class RubricsBasedMetricTest {
 

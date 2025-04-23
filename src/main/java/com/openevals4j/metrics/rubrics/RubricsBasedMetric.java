@@ -3,9 +3,9 @@ package com.openevals4j.metrics.rubrics;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.LLMBasedMetric;
+import com.openevals4j.metrics.MetricName;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
-import com.openevals4j.metrics.models.ValidationProfile;
 import com.openevals4j.metrics.rubrics.models.CriterionScore;
 import com.openevals4j.metrics.rubrics.models.RubricCriterion;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -27,7 +27,7 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
       ChatLanguageModel evaluatorLLM,
       ObjectMapper objectMapper,
       List<RubricCriterion> rubricCriteria) {
-    super("Rubrics Based Evaluation", evaluatorLLM, objectMapper);
+    super(MetricName.RUBRICS_BASED, evaluatorLLM, objectMapper);
 
     if (rubricCriteria == null || rubricCriteria.isEmpty()) {
       throw new IllegalArgumentException("Rubric criteria must be provided");
@@ -53,8 +53,7 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
 
       // Parse the response
       Map<String, Object> responseMap =
-          getObjectMapper()
-              .readValue(output.aiMessage().text(), new TypeReference<>() {});
+          getObjectMapper().readValue(output.aiMessage().text(), new TypeReference<>() {});
 
       // Extract criteria scores
       @SuppressWarnings("unchecked")
@@ -66,13 +65,16 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
       }
 
       // Convert to CriterionScore objects
-      List<CriterionScore> criteriaScores = criteriaScoresMap.stream()
-          .map(map -> CriterionScore.builder()
-              .criterion((String) map.get("criterion"))
-              .score(((Number) map.get("score")).intValue())
-              .justification((String) map.get("justification"))
-              .build())
-          .toList();
+      List<CriterionScore> criteriaScores =
+          criteriaScoresMap.stream()
+              .map(
+                  map ->
+                      CriterionScore.builder()
+                          .criterion((String) map.get("criterion"))
+                          .score(((Number) map.get("score")).intValue())
+                          .justification((String) map.get("justification"))
+                          .build())
+              .toList();
 
       // Calculate weighted score
       double weightedScore = calculateWeightedScore(criteriaScores);
@@ -96,16 +98,18 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
     }
   }
 
-  /**
-   * Calculates the weighted score based on individual criterion scores and their weights
-   */
+  /** Calculates the weighted score based on individual criterion scores and their weights */
   private double calculateWeightedScore(List<CriterionScore> criteriaScores) {
     double totalWeightedScore = 0.0;
     double totalWeight = 0.0;
 
     // Map criterion names to their weights
-    Map<String, Double> criterionWeights = rubricCriteria.stream()
-        .collect(HashMap::new, (map, criterion) -> map.put(criterion.getName(), criterion.getWeight()), HashMap::putAll);
+    Map<String, Double> criterionWeights =
+        rubricCriteria.stream()
+            .collect(
+                HashMap::new,
+                (map, criterion) -> map.put(criterion.getName(), criterion.getWeight()),
+                HashMap::putAll);
 
     for (CriterionScore criterionScore : criteriaScores) {
       String criterionName = criterionScore.getCriterion();
@@ -121,19 +125,19 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
     return totalWeight > 0 ? (totalWeightedScore / totalWeight) / 5.0 : 0.0;
   }
 
-  /**
-   * Generates a reasoning string based on the criteria scores and final weighted score
-   */
+  /** Generates a reasoning string based on the criteria scores and final weighted score */
   private String generateReasoning(List<CriterionScore> criteriaScores, double weightedScore) {
     StringBuilder reasoning = new StringBuilder();
     reasoning.append(String.format("Overall score: %.2f/1.0\n\n", weightedScore));
     reasoning.append("Individual criteria scores:\n");
 
     for (CriterionScore criterionScore : criteriaScores) {
-      reasoning.append(String.format("- %s: %d/5 - %s\n",
-          criterionScore.getCriterion(),
-          criterionScore.getScore(),
-          criterionScore.getJustification()));
+      reasoning.append(
+          String.format(
+              "- %s: %d/5 - %s\n",
+              criterionScore.getCriterion(),
+              criterionScore.getScore(),
+              criterionScore.getJustification()));
     }
 
     return reasoning.toString();
@@ -179,10 +183,12 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
                 .name("RubricsEvaluation")
                 .rootElement(
                     dev.langchain4j.model.chat.request.json.JsonObjectSchema.builder()
-                        .addProperty("criteriaScores",
+                        .addProperty(
+                            "criteriaScores",
                             dev.langchain4j.model.chat.request.json.JsonArraySchema.builder()
                                 .items(
-                                    dev.langchain4j.model.chat.request.json.JsonObjectSchema.builder()
+                                    dev.langchain4j.model.chat.request.json.JsonObjectSchema
+                                        .builder()
                                         .addStringProperty("criterion")
                                         .addNumberProperty("score")
                                         .addStringProperty("justification")
@@ -196,7 +202,7 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
   }
 
   @Override
-  protected ValidationProfile getValidationProfile() {
-    return ValidationProfile.RUBRICS_BASED;
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("userInput", "actualResponse");
   }
 }

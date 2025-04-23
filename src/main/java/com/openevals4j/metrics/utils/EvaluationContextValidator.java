@@ -1,7 +1,6 @@
 package com.openevals4j.metrics.utils;
 
 import com.openevals4j.metrics.models.EvaluationContext;
-import com.openevals4j.metrics.models.ValidationProfile;
 import com.openevals4j.metrics.models.ValidationResult;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,16 +86,5 @@ public class EvaluationContextValidator {
 
   private static boolean isListNotEmpty(List<String> list) {
     return !Objects.isNull(list) && !list.isEmpty();
-  }
-
-  /**
-   * Validates an EvaluationContext based on a predefined validation profile.
-   *
-   * @param context The EvaluationContext to validate
-   * @param profile The predefined ValidationProfile to use
-   * @return A ValidationResult containing validation status and any error messages
-   */
-  public static ValidationResult validate(EvaluationContext context, ValidationProfile profile) {
-    return validate(context, profile.getRequiredFields());
   }
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.exception.EvaluationContextValidationException;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
-import com.openevals4j.metrics.models.ValidationProfile;
 import com.openevals4j.metrics.models.ValidationResult;
 import com.openevals4j.metrics.utils.EvaluationContextValidator;
 import dev.langchain4j.data.message.UserMessage;
@@ -21,7 +20,7 @@ import lombok.Data;
 @Data
 public class LLMBasedMetric<K, V> implements Metric<K, V> {
 
-  private final String metricName;
+  private final MetricName metricName;
 
   private final ChatLanguageModel evaluatorLLM;
 
@@ -30,7 +29,7 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
   private final ResponseFormat responseFormat;
 
   public LLMBasedMetric(
-      String metricName, ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+      MetricName metricName, ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
     this.metricName = metricName;
     this.evaluatorLLM = evaluatorLLM;
     this.objectMapper = objectMapper;
@@ -79,13 +78,13 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
 
   protected void validateEvaluationContext(EvaluationContext evaluationContext) {
     ValidationResult result =
-        EvaluationContextValidator.validate(evaluationContext, getValidationProfile());
+        EvaluationContextValidator.validate(evaluationContext, getRequiredFieldsForValidation());
     if (!result.isValid()) {
       throw new EvaluationContextValidationException(result);
     }
   }
 
-  protected ValidationProfile getValidationProfile() {
+  protected List<String> getRequiredFieldsForValidation() {
     return null;
   }
 }

@@ -5,7 +5,7 @@ public class ContextualPrecisionPromptConstants {
   private ContextualPrecisionPromptConstants() {}
 
   public static final String VERDICT_GENERATION_PROMPT =
-      """
+"""
 Given the input, expected output, and retrieval context, please generate a list of JSON objects to determine whether each node in the retrieval context was remotely useful in arriving at the expected output.
 
 **
@@ -45,7 +45,7 @@ Retrieval Context %s:
 """;
 
   public static final String REASON_GENERATION_PROMPT =
-      """
+"""
 Given the input, retrieval contexts, and contextual precision score, provide a CONCISE summary for the score. Explain why it is not higher, but also why it is at its current score.
 The retrieval contexts is a list of JSON with three keys: `verdict`, `reason` (reason for the verdict) and `node`. `verdict` will be either 'yes' or 'no', which represents whether the corresponding 'node' in the retrieval context is relevant to the input.
 Contextual precision represents if the relevant nodes are ranked higher than irrelevant nodes. Also note that retrieval contexts is given IN THE ORDER OF THEIR RANKINGS.

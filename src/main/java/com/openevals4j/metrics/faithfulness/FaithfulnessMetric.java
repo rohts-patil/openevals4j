@@ -3,11 +3,12 @@ package com.openevals4j.metrics.faithfulness;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.LLMBasedMetric;
+import com.openevals4j.metrics.MetricName;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
-import com.openevals4j.metrics.models.ValidationProfile;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.util.List;
 import lombok.Builder;
 
 public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
@@ -60,7 +61,7 @@ public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, Evalua
 
   @Builder
   public FaithfulnessMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
-    super("Faithfulness", evaluatorLLM, objectMapper);
+    super(MetricName.FAITHFULNESS, evaluatorLLM, objectMapper);
   }
 
   @Override
@@ -88,7 +89,8 @@ public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, Evalua
     return getDefaultEvaluationResult();
   }
 
-  protected ValidationProfile getValidationProfile() {
-    return ValidationProfile.FAITHFULNESS;
+  @Override
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("userInput", "actualResponse", "retrievedContexts");
   }
 }

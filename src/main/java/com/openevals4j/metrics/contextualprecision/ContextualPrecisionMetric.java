@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.Constants;
 import com.openevals4j.metrics.LLMBasedMetric;
+import com.openevals4j.metrics.MetricName;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
-import com.openevals4j.metrics.models.ValidationProfile;
 import com.openevals4j.metrics.models.VerdictWithReason;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -23,7 +23,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
   @Builder
   public ContextualPrecisionMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
-    super("Contextual Precision", evaluatorLLM, objectMapper);
+    super(MetricName.CONTEXTUAL_PRECISION, evaluatorLLM, objectMapper);
   }
 
   @Override
@@ -134,7 +134,7 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
   }
 
   @Override
-  protected ValidationProfile getValidationProfile() {
-    return ValidationProfile.CONTEXTUAL_PRECISION;
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("userInput", "retrievedContexts");
   }
 }
