@@ -20,7 +20,7 @@ implementations.
 <dependency>
     <groupId>com.openevals4j</groupId>
     <artifactId>openevals4j</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ```
 
