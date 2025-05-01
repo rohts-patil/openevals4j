@@ -2,11 +2,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.openevals4j</groupId>
+    <groupId>io.github.rohts-patil</groupId>
     <artifactId>openevals4j</artifactId>
     <packaging>jar</packaging>
     <version>0.0.2-SNAPSHOT</version>
     <name>openevals4j</name>
+    <description>OpenEvals4J is a Java library for evaluating RAG (Retrieval-Augmented Generation) systems and AI agents
+        using LLM as judge. It provides a flexible and extensible framework for assessing the performance of your RAG
+        and agent implementations.
+    </description>
+    <url>https://github.com/rohts-patil/openevals4j</url>
+    <inceptionYear>2025</inceptionYear>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -18,6 +24,33 @@
         <lombok-version>1.18.26</lombok-version>
         <jackson-version>2.15.2</jackson-version>
     </properties>
+
+    <scm>
+        <connection>scm:git:https://github.com/rohts-patil/openevals4j.git</connection>
+        <developerConnection>scm:git:https://github.com/rohts-patil/openevals4j.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/rohts-patil/openevals4j</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/rohts-patil/openevals4j/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>rohts-patil</id>
+            <name>Rohit Patil</name>
+            <email>rohts.patil@gmail.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
 
 
     <dependencies>
@@ -88,14 +121,56 @@
                     </includes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.10.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/rohts-patil/openevals4j</url>
-        </repository>
-    </distributionManagement>
 </project>
