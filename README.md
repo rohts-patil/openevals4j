@@ -18,7 +18,7 @@ implementations.
 ```xml
 
 <dependency>
-    <groupId>com.openevals4j</groupId>
+    <groupId>io.github.rohts-patil</groupId>
     <artifactId>openevals4j</artifactId>
     <version>0.0.1</version>
 </dependency>
