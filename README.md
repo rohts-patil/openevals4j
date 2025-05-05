@@ -15,6 +15,8 @@ implementations.
 
 ### Maven Dependency
 
+Published on Maven Central https://central.sonatype.com/artifact/io.github.rohts-patil/openevals4j
+
 ```xml
 
 <dependency>
