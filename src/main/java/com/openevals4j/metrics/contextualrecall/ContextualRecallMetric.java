@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
   @Builder
@@ -35,7 +37,11 @@ public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, Ev
       double score = calculateScore(verdicts);
       String reason = generateReason(evaluationContext.getExpectedResponse(), score, verdicts);
       return EvaluationResult.builder().score(score).reasoning(reason).build();
-    } catch (Exception e) {
+    } catch (Exception exception) {
+      log.error(
+          "Error occurred while evaluating contextual recall metric for evaluation context {}",
+          evaluationContext,
+          exception);
       return getDefaultEvaluationResult();
     }
   }

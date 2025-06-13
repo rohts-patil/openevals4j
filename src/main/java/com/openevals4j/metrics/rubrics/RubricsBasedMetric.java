@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
@@ -92,8 +94,12 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
           .debugData(debugData)
           .build();
 
-    } catch (Exception e) {
-      // TODO: log exception
+    } catch (Exception exception) {
+      log.error(
+          "Error occurred while evaluating rubrics-based metric for criteria {} and evaluation context {}",
+          rubricCriteria,
+          evaluationContext,
+          exception);
       return getDefaultEvaluationResult();
     }
   }

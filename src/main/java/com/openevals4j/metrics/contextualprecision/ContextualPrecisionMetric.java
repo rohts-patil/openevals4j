@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
   @Builder
@@ -39,7 +41,11 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
       double score = calculateScore(verdicts);
       String reason = generateReason(evaluationContext.getUserInput(), score, verdicts);
       return EvaluationResult.builder().score(score).reasoning(reason).build();
-    } catch (Exception e) {
+    } catch (Exception exception) {
+      log.error(
+          "Error occurred while evaluating contextual precision metric for evaluation context {}",
+          evaluationContext,
+          exception);
       return getDefaultEvaluationResult();
     }
   }

@@ -23,6 +23,8 @@
         <junit-version>5.9.2</junit-version>
         <lombok-version>1.18.26</lombok-version>
         <jackson-version>2.15.2</jackson-version>
+        <slf4j-version>2.0.9</slf4j-version>
+        <logback-version>1.4.14</logback-version>
     </properties>
 
     <scm>
@@ -97,6 +99,20 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-version}</version>
+        </dependency>
+
+        <!-- SLF4J API for logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-version}</version>
+        </dependency>
+
+        <!-- Logback Classic as SLF4J implementation -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-version}</version>
         </dependency>
     </dependencies>
 

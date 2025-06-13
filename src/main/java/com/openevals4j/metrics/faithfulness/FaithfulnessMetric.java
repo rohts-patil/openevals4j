@@ -10,7 +10,9 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
   public static final String FAITHFULNESS_EVALUATION_PROMPT =
@@ -82,8 +84,11 @@ public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, Evalua
 
       return getObjectMapper().readValue(output.aiMessage().text(), EvaluationResult.class);
 
-    } catch (JsonProcessingException e) {
-      // TODO : log exception
+    } catch (JsonProcessingException exception) {
+      log.error(
+          "Error occurred while evaluating faithfulness metric for evaluation context {}",
+          evaluationContext,
+          exception);
     }
 
     return getDefaultEvaluationResult();
