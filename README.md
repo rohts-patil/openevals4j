@@ -22,7 +22,7 @@ Published on Maven Central https://central.sonatype.com/artifact/io.github.rohts
 <dependency>
     <groupId>io.github.rohts-patil</groupId>
     <artifactId>openevals4j</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
