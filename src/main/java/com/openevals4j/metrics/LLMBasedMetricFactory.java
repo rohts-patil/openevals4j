@@ -6,6 +6,7 @@ import com.openevals4j.metrics.contextualrecall.ContextualRecallMetric;
 import com.openevals4j.metrics.faithfulness.FaithfulnessMetric;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
+import com.openevals4j.metrics.responsecompleteness.ResponseCompletenessMetric;
 import com.openevals4j.metrics.rubrics.RubricsBasedMetric;
 import com.openevals4j.metrics.rubrics.models.RubricCriterion;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -50,6 +51,14 @@ public class LLMBasedMetricFactory {
         .build();
   }
 
+  private static ResponseCompletenessMetric createResponseCompletenessMetric(
+      ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+    return ResponseCompletenessMetric.builder()
+        .evaluatorLLM(evaluatorLLM)
+        .objectMapper(objectMapper)
+        .build();
+  }
+
   public static LLMBasedMetric<EvaluationContext, EvaluationResult> createMetric(
       MetricName metricName,
       ChatLanguageModel evaluatorLLM,
@@ -60,6 +69,7 @@ public class LLMBasedMetricFactory {
       case FAITHFULNESS -> createFaithfulnessMetric(evaluatorLLM, objectMapper);
       case CONTEXTUAL_PRECISION -> createContextualPrecisionMetric(evaluatorLLM, objectMapper);
       case RUBRICS_BASED -> createRubricsBasedMetric(evaluatorLLM, objectMapper, rubricCriteria);
+      case RESPONSE_COMPLETENESS -> createResponseCompletenessMetric(evaluatorLLM, objectMapper);
     };
   }
 }
