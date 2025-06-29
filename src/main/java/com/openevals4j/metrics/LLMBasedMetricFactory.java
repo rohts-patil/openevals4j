@@ -3,6 +3,7 @@ package com.openevals4j.metrics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.contextualprecision.ContextualPrecisionMetric;
 import com.openevals4j.metrics.contextualrecall.ContextualRecallMetric;
+import com.openevals4j.metrics.contextualrelevancy.ContextualRelevancyMetric;
 import com.openevals4j.metrics.faithfulness.FaithfulnessMetric;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
@@ -59,6 +60,14 @@ public class LLMBasedMetricFactory {
         .build();
   }
 
+  private static ContextualRelevancyMetric createContextualRelevancyMetric(
+      ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+    return ContextualRelevancyMetric.builder()
+        .evaluatorLLM(evaluatorLLM)
+        .objectMapper(objectMapper)
+        .build();
+  }
+
   public static LLMBasedMetric<EvaluationContext, EvaluationResult> createMetric(
       MetricName metricName,
       ChatLanguageModel evaluatorLLM,
@@ -68,6 +77,7 @@ public class LLMBasedMetricFactory {
       case CONTEXTUAL_RECALL -> createContextualRecallMetric(evaluatorLLM, objectMapper);
       case FAITHFULNESS -> createFaithfulnessMetric(evaluatorLLM, objectMapper);
       case CONTEXTUAL_PRECISION -> createContextualPrecisionMetric(evaluatorLLM, objectMapper);
+      case CONTEXTUAL_RELEVANCY -> createContextualRelevancyMetric(evaluatorLLM, objectMapper);
       case RUBRICS_BASED -> createRubricsBasedMetric(evaluatorLLM, objectMapper, rubricCriteria);
       case RESPONSE_COMPLETENESS -> createResponseCompletenessMetric(evaluatorLLM, objectMapper);
     };
