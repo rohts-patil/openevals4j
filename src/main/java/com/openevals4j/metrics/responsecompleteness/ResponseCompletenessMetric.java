@@ -16,9 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 public class ResponseCompletenessMetric
     extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
+  private final String evaluationPrompt;
+
   @Builder
-  public ResponseCompletenessMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+  public ResponseCompletenessMetric(
+          ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper, String evaluationPrompt) {
     super(MetricName.RESPONSE_COMPLETENESS, evaluatorLLM, objectMapper);
+    this.evaluationPrompt =
+            evaluationPrompt != null
+                    ? evaluationPrompt
+                    : ResponseCompletenessPromptConstants.RESPONSE_COMPLETENESS_EVALUATION_PROMPT;
   }
 
   @Override
@@ -27,11 +34,11 @@ public class ResponseCompletenessMetric
 
     try {
       String prompt =
-          String.format(
-              ResponseCompletenessPromptConstants.RESPONSE_COMPLETENESS_EVALUATION_PROMPT,
-              evaluationContext.getUserInput(),
-              evaluationContext.getExpectedResponse(),
-              evaluationContext.getActualResponse());
+              String.format(
+                      evaluationPrompt,
+                      evaluationContext.getUserInput(),
+                      evaluationContext.getExpectedResponse(),
+                      evaluationContext.getActualResponse());
 
       ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
 

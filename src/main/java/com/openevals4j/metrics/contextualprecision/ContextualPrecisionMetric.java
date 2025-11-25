@@ -23,9 +23,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
+  private final String verdictGenerationPrompt;
+  private final String reasonGenerationPrompt;
+
   @Builder
-  public ContextualPrecisionMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+  public ContextualPrecisionMetric(
+          ChatLanguageModel evaluatorLLM,
+          ObjectMapper objectMapper,
+          String verdictGenerationPrompt,
+          String reasonGenerationPrompt) {
     super(MetricName.CONTEXTUAL_PRECISION, evaluatorLLM, objectMapper);
+    this.verdictGenerationPrompt =
+            verdictGenerationPrompt != null
+                    ? verdictGenerationPrompt
+                    : ContextualPrecisionPromptConstants.VERDICT_GENERATION_PROMPT;
+    this.reasonGenerationPrompt =
+            reasonGenerationPrompt != null
+                    ? reasonGenerationPrompt
+                    : ContextualPrecisionPromptConstants.REASON_GENERATION_PROMPT;
   }
 
   @Override
@@ -64,11 +79,11 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
             .toList();
 
     String prompt =
-        String.format(
-            ContextualPrecisionPromptConstants.REASON_GENERATION_PROMPT,
-            score,
-            input,
-            retrievalContextsVerdicts);
+            String.format(
+                    reasonGenerationPrompt,
+                    score,
+                    input,
+                    retrievalContextsVerdicts);
 
     Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
 
@@ -132,11 +147,11 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
             + (retrievalContext.size() > 1 ? "s" : "")
             + ")";
     return String.format(
-        ContextualPrecisionPromptConstants.VERDICT_GENERATION_PROMPT,
-        input,
-        expectedOutput,
-        documentCountStr,
-        retrievalContext);
+            verdictGenerationPrompt,
+            input,
+            expectedOutput,
+            documentCountStr,
+            retrievalContext);
   }
 
   @Override
