@@ -60,10 +60,14 @@ public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, Evalua
           Answer: %s
 
           """;
+  private final String evaluationPrompt;
 
   @Builder
-  public FaithfulnessMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+  public FaithfulnessMetric(ChatLanguageModel evaluatorLLM,
+                            ObjectMapper objectMapper,
+                            String evaluationPrompt) {
     super(MetricName.FAITHFULNESS, evaluatorLLM, objectMapper);
+    this.evaluationPrompt = evaluationPrompt != null ? evaluationPrompt : FAITHFULNESS_EVALUATION_PROMPT;
   }
 
   @Override
@@ -74,11 +78,10 @@ public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, Evalua
     try {
 
       String prompt =
-          String.format(
-              FAITHFULNESS_EVALUATION_PROMPT,
-              evaluationContext.getRetrievedContexts(),
-              evaluationContext.getUserInput(),
-              evaluationContext.getActualResponse());
+              String.format(evaluationPrompt,
+                      evaluationContext.getRetrievedContexts(),
+                      evaluationContext.getUserInput(),
+                      evaluationContext.getActualResponse());
 
       ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
 

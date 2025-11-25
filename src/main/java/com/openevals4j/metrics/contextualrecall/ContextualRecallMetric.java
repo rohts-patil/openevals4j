@@ -22,9 +22,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
+  private final String verdictGenerationPrompt;
+  private final String reasonGenerationPrompt;
+
   @Builder
-  public ContextualRecallMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+  public ContextualRecallMetric(
+          ChatLanguageModel evaluatorLLM,
+          ObjectMapper objectMapper,
+          String verdictGenerationPrompt,
+          String reasonGenerationPrompt) {
     super(MetricName.CONTEXTUAL_RECALL, evaluatorLLM, objectMapper);
+    this.verdictGenerationPrompt =
+            verdictGenerationPrompt != null
+                    ? verdictGenerationPrompt
+                    : ContextualRecallPromptConstants.VERDICT_GENERATION_PROMPT;
+    this.reasonGenerationPrompt =
+            reasonGenerationPrompt != null
+                    ? reasonGenerationPrompt
+                    : ContextualRecallPromptConstants.REASON_GENERATION_PROMPT;
   }
 
   @Override
@@ -61,12 +76,12 @@ public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, Ev
     }
 
     String prompt =
-        String.format(
-            ContextualRecallPromptConstants.REASON_GENERATION_PROMPT,
-            score,
-            expectedResponse,
-            supportiveReasons,
-            unSupportiveReasons);
+            String.format(
+                    reasonGenerationPrompt,
+                    score,
+                    expectedResponse,
+                    supportiveReasons,
+                    unSupportiveReasons);
 
     Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
 
@@ -76,13 +91,13 @@ public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, Ev
   }
 
   private List<VerdictWithReason> generateVerdicts(
-      String expectedOutput, List<String> retrievalContext) throws JsonProcessingException {
+          String expectedOutput, List<String> retrievalContext) throws JsonProcessingException {
 
     String prompt =
-        String.format(
-            ContextualRecallPromptConstants.VERDICT_GENERATION_PROMPT,
-            expectedOutput,
-            retrievalContext);
+            String.format(
+                    verdictGenerationPrompt,
+                    expectedOutput,
+                    retrievalContext);
     Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
 
     String content = res.content().text().replaceAll(Constants.REGEX, "");

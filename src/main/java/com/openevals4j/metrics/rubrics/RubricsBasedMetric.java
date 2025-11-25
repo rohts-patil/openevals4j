@@ -23,12 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
   private final List<RubricCriterion> rubricCriteria;
+  private final String evaluationPrompt;
 
   @Builder
   public RubricsBasedMetric(
-      ChatLanguageModel evaluatorLLM,
-      ObjectMapper objectMapper,
-      List<RubricCriterion> rubricCriteria) {
+          ChatLanguageModel evaluatorLLM,
+          ObjectMapper objectMapper,
+          List<RubricCriterion> rubricCriteria,
+          String evaluationPrompt) {
     super(MetricName.RUBRICS_BASED, evaluatorLLM, objectMapper);
 
     if (rubricCriteria == null || rubricCriteria.isEmpty()) {
@@ -36,6 +38,10 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
     }
 
     this.rubricCriteria = rubricCriteria;
+    this.evaluationPrompt =
+            evaluationPrompt != null
+                    ? evaluationPrompt
+                    : RubricsPromptConstants.RUBRICS_EVALUATION_PROMPT;
   }
 
   @Override
@@ -45,17 +51,17 @@ public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, Evalua
     try {
       String formattedRubric = formatRubricCriteria(rubricCriteria);
       String prompt =
-          String.format(
-              RubricsPromptConstants.RUBRICS_EVALUATION_PROMPT,
-              formattedRubric,
-              evaluationContext.getUserInput(),
-              evaluationContext.getActualResponse());
+              String.format(
+                      evaluationPrompt,
+                      formattedRubric,
+                      evaluationContext.getUserInput(),
+                      evaluationContext.getActualResponse());
 
       ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
 
       // Parse the response
       Map<String, Object> responseMap =
-          getObjectMapper().readValue(output.aiMessage().text(), new TypeReference<>() {});
+              getObjectMapper().readValue(output.aiMessage().text(), new TypeReference<>() {});
 
       // Extract criteria scores
       @SuppressWarnings("unchecked")

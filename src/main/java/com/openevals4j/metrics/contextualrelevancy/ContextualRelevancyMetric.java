@@ -22,9 +22,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContextualRelevancyMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
+  private final String verdictGenerationPrompt;
+  private final String reasonGenerationPrompt;
+
   @Builder
-  public ContextualRelevancyMetric(ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+  public ContextualRelevancyMetric(
+          ChatLanguageModel evaluatorLLM,
+          ObjectMapper objectMapper,
+          String verdictGenerationPrompt,
+          String reasonGenerationPrompt) {
     super(MetricName.CONTEXTUAL_RELEVANCY, evaluatorLLM, objectMapper);
+    this.verdictGenerationPrompt =
+            verdictGenerationPrompt != null
+                    ? verdictGenerationPrompt
+                    : ContextualRelevancyPromptConstants.VERDICT_GENERATION_PROMPT;
+    this.reasonGenerationPrompt =
+            reasonGenerationPrompt != null
+                    ? reasonGenerationPrompt
+                    : ContextualRelevancyPromptConstants.REASON_GENERATION_PROMPT;
   }
 
   @Override
@@ -61,11 +76,11 @@ public class ContextualRelevancyMetric extends LLMBasedMetric<EvaluationContext,
             .toList();
 
     String prompt =
-        String.format(
-            ContextualRelevancyPromptConstants.REASON_GENERATION_PROMPT,
-            score,
-            input,
-            retrievalContextsVerdicts);
+            String.format(
+                    reasonGenerationPrompt,
+                    score,
+                    input,
+                    retrievalContextsVerdicts);
 
     Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
 
@@ -75,7 +90,7 @@ public class ContextualRelevancyMetric extends LLMBasedMetric<EvaluationContext,
   }
 
   private List<VerdictWithReason> generateVerdicts(String input, List<String> retrievalContext)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
 
     String prompt = getGenerateVerdictsPrompt(input, retrievalContext);
 
@@ -113,10 +128,10 @@ public class ContextualRelevancyMetric extends LLMBasedMetric<EvaluationContext,
             + (retrievalContext.size() > 1 ? "s" : "")
             + ")";
     return String.format(
-        ContextualRelevancyPromptConstants.VERDICT_GENERATION_PROMPT,
-        input,
-        documentCountStr,
-        retrievalContext);
+            verdictGenerationPrompt,
+            input,
+            documentCountStr,
+            retrievalContext);
   }
 
   @Override
