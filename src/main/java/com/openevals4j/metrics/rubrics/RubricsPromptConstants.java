@@ -29,6 +29,9 @@ public class RubricsPromptConstants {
           - Provide a brief justification for the score
 
           ## Output Format
+          CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+          CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
+
           Provide your response in the following JSON format:
           ```json
           {

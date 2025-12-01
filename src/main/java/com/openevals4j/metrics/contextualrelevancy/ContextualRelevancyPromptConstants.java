@@ -10,6 +10,8 @@ Given the user input and retrieval context, please generate a list of JSON objec
 
 **
 IMPORTANT: Please make sure to only return in JSON format, with the list of JSON. These JSON only contain the `verdict` key that outputs only 'yes' or 'no', and a `reason` key to justify the verdict. In your reason, you should aim to quote parts of the context.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
 
 Example Retrieval Context: ["The capital of France is Paris.", "Paris is known for the Eiffel Tower.", "The weather today is sunny."]
 Example Input: "What is the capital of France?"
@@ -64,6 +66,9 @@ Contextual relevancy measures the proportion of retrieved contexts that are actu
 
 **
 IMPORTANT: Please make sure to only return in JSON format, with the 'reason' key providing the reason.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
+
 Example JSON:
 {
     "reason": "The score is <contextual_relevancy_score> because <your_reason>."
