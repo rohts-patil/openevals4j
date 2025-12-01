@@ -13,6 +13,8 @@ You should also aim to quote the specific part of the retrieval context to justi
 
 **
 IMPORTANT: Please make sure to only return in JSON format as a list of JSON objects, each with two keys: `verdict` and `reason`.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
 
  [
         {
@@ -47,6 +49,9 @@ In your reason, you should relate supportive/unsupportive reasons to the sentenc
 
 **
 IMPORTANT: Please make sure to only return in JSON format, with the 'reason' key providing the reason.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
+
 Example JSON:
 {
     "reason": "The score is <contextual_recall_score> because <your_reason>."

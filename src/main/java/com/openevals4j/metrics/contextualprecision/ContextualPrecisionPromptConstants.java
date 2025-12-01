@@ -10,6 +10,9 @@ Given the input, expected output, and retrieval context, please generate a list 
 
 **
 IMPORTANT: Please make sure to only return in JSON format, with the list of JSON. These JSON only contain the `verdict` key that outputs only 'yes' or 'no', and a `reason` key to justify the verdict. In your reason, you should aim to quote parts of the context.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
+
 Example Retrieval Context: ["Einstein won the Nobel Prize for his discovery of the photoelectric effect", "He won the Nobel Prize in 1968.", "There was a cat."]
 Example Input: "Who won the Nobel Prize in 1968 and for what?"
 Example Expected Output: "Einstein won the Nobel Prize in 1968 for his discovery of the photoelectric effect."
@@ -52,6 +55,9 @@ Contextual precision represents if the relevant nodes are ranked higher than irr
 
 **
 IMPORTANT: Please make sure to only return in JSON format, with the 'reason' key providing the reason.
+CRITICAL: Use ONLY straight double quotes (") for JSON strings, NOT curly/smart quotes (" or "). The JSON must be parseable by standard JSON parsers.
+CRITICAL: Ensure all JSON syntax is valid - proper commas, brackets, and no trailing commas.
+
 Example JSON:
 {
     "reason": "The score is <contextual_precision_score> because <your_reason>."
