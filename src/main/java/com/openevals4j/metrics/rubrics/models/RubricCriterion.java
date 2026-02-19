@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RubricCriterion {
-  private String name;
-  private String description;
-  private double weight;
-  private Map<Integer, String> scoringGuidelines;
+    private String name;
+    private String description;
+    private double weight;
+    private Map<Integer, String> scoringGuidelines;
 }

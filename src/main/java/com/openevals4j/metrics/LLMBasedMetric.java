@@ -20,71 +20,71 @@ import lombok.Data;
 @Data
 public class LLMBasedMetric<K, V> implements Metric<K, V> {
 
-  private final MetricName metricName;
+    private final MetricName metricName;
 
-  private final ChatLanguageModel evaluatorLLM;
+    private final ChatLanguageModel evaluatorLLM;
 
-  private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-  private final ResponseFormat responseFormat;
+    private final ResponseFormat responseFormat;
 
-  public LLMBasedMetric(
-      MetricName metricName, ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
-    this.metricName = metricName;
-    this.evaluatorLLM = evaluatorLLM;
-    this.objectMapper = objectMapper;
-    this.responseFormat = buildResponseFormatForScoreAndReasoning();
-  }
-
-  @Override
-  public V evaluate(K input) {
-    return null;
-  }
-
-  @Override
-  public List<V> evaluateBatch(List<K> inputs) {
-    return inputs.stream().map(this::evaluate).toList();
-  }
-
-  protected ChatRequest buildChatRequest(String prompt, ResponseFormat responseFormat) {
-    return ChatRequest.builder()
-        .responseFormat(responseFormat)
-        .messages(UserMessage.from(prompt))
-        .build();
-  }
-
-  protected ResponseFormat buildResponseFormatForScoreAndReasoning() {
-    return ResponseFormat.builder()
-        .type(JSON)
-        .jsonSchema(
-            JsonSchema.builder()
-                .name("EvaluationResult")
-                .rootElement(
-                    JsonObjectSchema.builder()
-                        .addStringProperty("reasoning")
-                        .addNumberProperty("score")
-                        .required("reasoning", "score")
-                        .build())
-                .build())
-        .build();
-  }
-
-  protected EvaluationResult getDefaultEvaluationResult() {
-    return EvaluationResult.builder()
-        .score(Double.NaN)
-        .reasoning(String.format("Error while evaluating %s metric", getMetricName()))
-        .build();
-  }
-
-  protected void validateEvaluationContext(EvaluationContext evaluationContext) {
-    ValidationResult result =
-        EvaluationContextValidator.validate(evaluationContext, getRequiredFieldsForValidation());
-    if (!result.isValid()) {
-      throw new EvaluationContextValidationException(result);
+    public LLMBasedMetric(
+            MetricName metricName, ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
+        this.metricName = metricName;
+        this.evaluatorLLM = evaluatorLLM;
+        this.objectMapper = objectMapper;
+        this.responseFormat = buildResponseFormatForScoreAndReasoning();
     }
-  }
 
-  protected List<String> getRequiredFieldsForValidation() {
-    return null;
-  }
+    @Override
+    public V evaluate(K input) {
+        return null;
+    }
+
+    @Override
+    public List<V> evaluateBatch(List<K> inputs) {
+        return inputs.stream().map(this::evaluate).toList();
+    }
+
+    protected ChatRequest buildChatRequest(String prompt, ResponseFormat responseFormat) {
+        return ChatRequest.builder()
+                .responseFormat(responseFormat)
+                .messages(UserMessage.from(prompt))
+                .build();
+    }
+
+    protected ResponseFormat buildResponseFormatForScoreAndReasoning() {
+        return ResponseFormat.builder()
+                .type(JSON)
+                .jsonSchema(
+                        JsonSchema.builder()
+                                .name("EvaluationResult")
+                                .rootElement(
+                                        JsonObjectSchema.builder()
+                                                .addStringProperty("reasoning")
+                                                .addNumberProperty("score")
+                                                .required("reasoning", "score")
+                                                .build())
+                                .build())
+                .build();
+    }
+
+    protected EvaluationResult getDefaultEvaluationResult() {
+        return EvaluationResult.builder()
+                .score(Double.NaN)
+                .reasoning(String.format("Error while evaluating %s metric", getMetricName()))
+                .build();
+    }
+
+    protected void validateEvaluationContext(EvaluationContext evaluationContext) {
+        ValidationResult result =
+                EvaluationContextValidator.validate(evaluationContext, getRequiredFieldsForValidation());
+        if (!result.isValid()) {
+            throw new EvaluationContextValidationException(result);
+        }
+    }
+
+    protected List<String> getRequiredFieldsForValidation() {
+        return null;
+    }
 }
