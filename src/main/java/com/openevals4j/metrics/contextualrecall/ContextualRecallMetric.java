@@ -22,114 +22,109 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContextualRecallMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
-    private final String verdictGenerationPrompt;
-    private final String reasonGenerationPrompt;
+  private final String verdictGenerationPrompt;
+  private final String reasonGenerationPrompt;
 
-    @Builder
-    public ContextualRecallMetric(
-            ChatLanguageModel evaluatorLLM,
-            ObjectMapper objectMapper,
-            String verdictGenerationPrompt,
-            String reasonGenerationPrompt) {
-        super(MetricName.CONTEXTUAL_RECALL, evaluatorLLM, objectMapper);
-        this.verdictGenerationPrompt =
-                verdictGenerationPrompt != null
-                        ? verdictGenerationPrompt
-                        : ContextualRecallPromptConstants.VERDICT_GENERATION_PROMPT;
-        this.reasonGenerationPrompt =
-                reasonGenerationPrompt != null
-                        ? reasonGenerationPrompt
-                        : ContextualRecallPromptConstants.REASON_GENERATION_PROMPT;
+  @Builder
+  public ContextualRecallMetric(
+      ChatLanguageModel evaluatorLLM,
+      ObjectMapper objectMapper,
+      String verdictGenerationPrompt,
+      String reasonGenerationPrompt) {
+    super(MetricName.CONTEXTUAL_RECALL, evaluatorLLM, objectMapper);
+    this.verdictGenerationPrompt =
+        verdictGenerationPrompt != null
+            ? verdictGenerationPrompt
+            : ContextualRecallPromptConstants.VERDICT_GENERATION_PROMPT;
+    this.reasonGenerationPrompt =
+        reasonGenerationPrompt != null
+            ? reasonGenerationPrompt
+            : ContextualRecallPromptConstants.REASON_GENERATION_PROMPT;
+  }
+
+  @Override
+  public EvaluationResult evaluate(EvaluationContext evaluationContext) {
+    validateEvaluationContext(evaluationContext);
+    try {
+      List<VerdictWithReason> verdicts =
+          generateVerdicts(
+              evaluationContext.getExpectedResponse(), evaluationContext.getRetrievedContexts());
+      double score = calculateScore(verdicts);
+      String reason = generateReason(evaluationContext.getExpectedResponse(), score, verdicts);
+      return EvaluationResult.builder().score(score).reasoning(reason).build();
+    } catch (Exception exception) {
+      log.error(
+          "Error occurred while evaluating contextual recall metric for evaluation context {}",
+          evaluationContext,
+          exception);
+      return getDefaultEvaluationResult();
+    }
+  }
+
+  private String generateReason(
+      String expectedResponse, double score, List<VerdictWithReason> verdicts)
+      throws JsonProcessingException {
+    List<String> supportiveReasons = new ArrayList<>();
+    List<String> unSupportiveReasons = new ArrayList<>();
+
+    for (VerdictWithReason verdict : verdicts) {
+      if (Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim())) {
+        supportiveReasons.add(verdict.getReason());
+      } else {
+        unSupportiveReasons.add(verdict.getReason());
+      }
     }
 
-    @Override
-    public EvaluationResult evaluate(EvaluationContext evaluationContext) {
-        validateEvaluationContext(evaluationContext);
-        try {
-            List<VerdictWithReason> verdicts =
-                    generateVerdicts(
-                            evaluationContext.getExpectedResponse(), evaluationContext.getRetrievedContexts());
-            double score = calculateScore(verdicts);
-            String reason = generateReason(evaluationContext.getExpectedResponse(), score, verdicts);
-            return EvaluationResult.builder().score(score).reasoning(reason).build();
-        } catch (Exception exception) {
-            log.error(
-                    "Error occurred while evaluating contextual recall metric for evaluation context {}",
-                    evaluationContext,
-                    exception);
-            return getDefaultEvaluationResult();
-        }
+    String prompt =
+        String.format(
+            reasonGenerationPrompt,
+            score,
+            expectedResponse,
+            supportiveReasons,
+            unSupportiveReasons);
+
+    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+
+    String content = res.content().text().replaceAll(Constants.REGEX, "");
+
+    return extractReason(content);
+  }
+
+  private List<VerdictWithReason> generateVerdicts(
+      String expectedOutput, List<String> retrievalContext) throws JsonProcessingException {
+
+    String prompt = String.format(verdictGenerationPrompt, expectedOutput, retrievalContext);
+    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+
+    String content = res.content().text().replaceAll(Constants.REGEX, "");
+
+    return getObjectMapper().readValue(content, new TypeReference<>() {});
+  }
+
+  private String extractReason(String jsonString) throws JsonProcessingException {
+    return (String) getObjectMapper().readValue(jsonString, Map.class).get("reason");
+  }
+
+  private double calculateScore(List<VerdictWithReason> verdicts) {
+    int numberOfVerdicts = verdicts.size();
+
+    if (numberOfVerdicts == 0) {
+      return 0;
     }
 
-    private String generateReason(
-            String expectedResponse, double score, List<VerdictWithReason> verdicts)
-            throws JsonProcessingException {
-        List<String> supportiveReasons = new ArrayList<>();
-        List<String> unSupportiveReasons = new ArrayList<>();
+    int justifiedVerdicts = 0;
 
-        for (VerdictWithReason verdict : verdicts) {
-            if (Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim())) {
-                supportiveReasons.add(verdict.getReason());
-            } else {
-                unSupportiveReasons.add(verdict.getReason());
-            }
-        }
-
-        String prompt =
-                String.format(
-                        reasonGenerationPrompt,
-                        score,
-                        expectedResponse,
-                        supportiveReasons,
-                        unSupportiveReasons);
-
-        Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
-
-        String content = res.content().text().replaceAll(Constants.REGEX, "");
-
-        return extractReason(content);
+    for (VerdictWithReason verdict : verdicts) {
+      if (Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim())) {
+        justifiedVerdicts++;
+      }
     }
 
-    private List<VerdictWithReason> generateVerdicts(
-            String expectedOutput, List<String> retrievalContext) throws JsonProcessingException {
+    return (double) justifiedVerdicts / numberOfVerdicts;
+  }
 
-        String prompt =
-                String.format(
-                        verdictGenerationPrompt,
-                        expectedOutput,
-                        retrievalContext);
-        Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
-
-        String content = res.content().text().replaceAll(Constants.REGEX, "");
-
-        return getObjectMapper().readValue(content, new TypeReference<>() {
-        });
-    }
-
-    private String extractReason(String jsonString) throws JsonProcessingException {
-        return (String) getObjectMapper().readValue(jsonString, Map.class).get("reason");
-    }
-
-    private double calculateScore(List<VerdictWithReason> verdicts) {
-        int numberOfVerdicts = verdicts.size();
-
-        if (numberOfVerdicts == 0) {
-            return 0;
-        }
-
-        int justifiedVerdicts = 0;
-
-        for (VerdictWithReason verdict : verdicts) {
-            if (Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim())) {
-                justifiedVerdicts++;
-            }
-        }
-
-        return (double) justifiedVerdicts / numberOfVerdicts;
-    }
-
-    @Override
-    protected List<String> getRequiredFieldsForValidation() {
-        return List.of("expectedResponse", "retrievedContexts");
-    }
+  @Override
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("expectedResponse", "retrievedContexts");
+  }
 }

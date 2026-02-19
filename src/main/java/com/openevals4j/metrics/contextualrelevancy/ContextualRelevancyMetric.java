@@ -22,121 +22,111 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContextualRelevancyMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
-    private final String verdictGenerationPrompt;
-    private final String reasonGenerationPrompt;
+  private final String verdictGenerationPrompt;
+  private final String reasonGenerationPrompt;
 
-    @Builder
-    public ContextualRelevancyMetric(
-            ChatLanguageModel evaluatorLLM,
-            ObjectMapper objectMapper,
-            String verdictGenerationPrompt,
-            String reasonGenerationPrompt) {
-        super(MetricName.CONTEXTUAL_RELEVANCY, evaluatorLLM, objectMapper);
-        this.verdictGenerationPrompt =
-                verdictGenerationPrompt != null
-                        ? verdictGenerationPrompt
-                        : ContextualRelevancyPromptConstants.VERDICT_GENERATION_PROMPT;
-        this.reasonGenerationPrompt =
-                reasonGenerationPrompt != null
-                        ? reasonGenerationPrompt
-                        : ContextualRelevancyPromptConstants.REASON_GENERATION_PROMPT;
+  @Builder
+  public ContextualRelevancyMetric(
+      ChatLanguageModel evaluatorLLM,
+      ObjectMapper objectMapper,
+      String verdictGenerationPrompt,
+      String reasonGenerationPrompt) {
+    super(MetricName.CONTEXTUAL_RELEVANCY, evaluatorLLM, objectMapper);
+    this.verdictGenerationPrompt =
+        verdictGenerationPrompt != null
+            ? verdictGenerationPrompt
+            : ContextualRelevancyPromptConstants.VERDICT_GENERATION_PROMPT;
+    this.reasonGenerationPrompt =
+        reasonGenerationPrompt != null
+            ? reasonGenerationPrompt
+            : ContextualRelevancyPromptConstants.REASON_GENERATION_PROMPT;
+  }
+
+  @Override
+  public EvaluationResult evaluate(EvaluationContext evaluationContext) {
+    validateEvaluationContext(evaluationContext);
+
+    try {
+      List<VerdictWithReason> verdicts =
+          generateVerdicts(
+              evaluationContext.getUserInput(), evaluationContext.getRetrievedContexts());
+      double score = calculateScore(verdicts);
+      String reason = generateReason(evaluationContext.getUserInput(), score, verdicts);
+      return EvaluationResult.builder().score(score).reasoning(reason).build();
+    } catch (Exception exception) {
+      log.error(
+          "Error occurred while evaluating contextual relevancy metric for evaluation context {}",
+          evaluationContext,
+          exception);
+      return getDefaultEvaluationResult();
+    }
+  }
+
+  private String generateReason(String input, double score, List<VerdictWithReason> verdicts)
+      throws JsonProcessingException {
+    List<Map<String, String>> retrievalContextsVerdicts =
+        verdicts.stream()
+            .map(
+                verdict -> {
+                  Map<String, String> map = new HashMap<>();
+                  map.put("verdict", verdict.getVerdict());
+                  map.put("reason", verdict.getReason());
+                  return map;
+                })
+            .toList();
+
+    String prompt = String.format(reasonGenerationPrompt, score, input, retrievalContextsVerdicts);
+
+    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+
+    String content = res.content().text().replaceAll(Constants.REGEX, "");
+
+    return extractReason(content);
+  }
+
+  private List<VerdictWithReason> generateVerdicts(String input, List<String> retrievalContext)
+      throws JsonProcessingException {
+
+    String prompt = getGenerateVerdictsPrompt(input, retrievalContext);
+
+    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+
+    String content = res.content().text().replaceAll(Constants.REGEX, "");
+
+    return getObjectMapper().readValue(content, new TypeReference<>() {});
+  }
+
+  private String extractReason(String jsonString) throws JsonProcessingException {
+    return (String) getObjectMapper().readValue(jsonString, Map.class).get("reason");
+  }
+
+  private double calculateScore(List<VerdictWithReason> verdicts) {
+    if (verdicts.isEmpty()) {
+      return 0.0;
     }
 
-    @Override
-    public EvaluationResult evaluate(EvaluationContext evaluationContext) {
-        validateEvaluationContext(evaluationContext);
+    long relevantCount =
+        verdicts.stream()
+            .mapToLong(
+                verdict ->
+                    Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim()) ? 1 : 0)
+            .sum();
 
-        try {
-            List<VerdictWithReason> verdicts =
-                    generateVerdicts(
-                            evaluationContext.getUserInput(), evaluationContext.getRetrievedContexts());
-            double score = calculateScore(verdicts);
-            String reason = generateReason(evaluationContext.getUserInput(), score, verdicts);
-            return EvaluationResult.builder().score(score).reasoning(reason).build();
-        } catch (Exception exception) {
-            log.error(
-                    "Error occurred while evaluating contextual relevancy metric for evaluation context {}",
-                    evaluationContext,
-                    exception);
-            return getDefaultEvaluationResult();
-        }
-    }
+    return (double) relevantCount / verdicts.size();
+  }
 
-    private String generateReason(String input, double score, List<VerdictWithReason> verdicts)
-            throws JsonProcessingException {
-        List<Map<String, String>> retrievalContextsVerdicts =
-                verdicts.stream()
-                        .map(
-                                verdict -> {
-                                    Map<String, String> map = new HashMap<>();
-                                    map.put("verdict", verdict.getVerdict());
-                                    map.put("reason", verdict.getReason());
-                                    return map;
-                                })
-                        .toList();
+  private String getGenerateVerdictsPrompt(String input, List<String> retrievalContext) {
+    String documentCountStr =
+        " ("
+            + retrievalContext.size()
+            + " document"
+            + (retrievalContext.size() > 1 ? "s" : "")
+            + ")";
+    return String.format(verdictGenerationPrompt, input, documentCountStr, retrievalContext);
+  }
 
-        String prompt =
-                String.format(
-                        reasonGenerationPrompt,
-                        score,
-                        input,
-                        retrievalContextsVerdicts);
-
-        Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
-
-        String content = res.content().text().replaceAll(Constants.REGEX, "");
-
-        return extractReason(content);
-    }
-
-    private List<VerdictWithReason> generateVerdicts(String input, List<String> retrievalContext)
-            throws JsonProcessingException {
-
-        String prompt = getGenerateVerdictsPrompt(input, retrievalContext);
-
-        Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
-
-        String content = res.content().text().replaceAll(Constants.REGEX, "");
-
-        return getObjectMapper().readValue(content, new TypeReference<>() {
-        });
-    }
-
-    private String extractReason(String jsonString) throws JsonProcessingException {
-        return (String) getObjectMapper().readValue(jsonString, Map.class).get("reason");
-    }
-
-    private double calculateScore(List<VerdictWithReason> verdicts) {
-        if (verdicts.isEmpty()) {
-            return 0.0;
-        }
-
-        long relevantCount =
-                verdicts.stream()
-                        .mapToLong(
-                                verdict ->
-                                        Constants.YES_SMALL_CASE.equalsIgnoreCase(verdict.getVerdict().trim()) ? 1 : 0)
-                        .sum();
-
-        return (double) relevantCount / verdicts.size();
-    }
-
-    private String getGenerateVerdictsPrompt(String input, List<String> retrievalContext) {
-        String documentCountStr =
-                " ("
-                        + retrievalContext.size()
-                        + " document"
-                        + (retrievalContext.size() > 1 ? "s" : "")
-                        + ")";
-        return String.format(
-                verdictGenerationPrompt,
-                input,
-                documentCountStr,
-                retrievalContext);
-    }
-
-    @Override
-    protected List<String> getRequiredFieldsForValidation() {
-        return List.of("userInput", "retrievedContexts");
-    }
+  @Override
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("userInput", "retrievedContexts");
+  }
 }

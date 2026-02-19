@@ -13,37 +13,37 @@ import org.junit.jupiter.api.Test;
 
 class ContextualPrecisionMetricTest {
 
-    private ContextualPrecisionMetric contextualPrecisionMetric;
+  private ContextualPrecisionMetric contextualPrecisionMetric;
 
-    @BeforeEach
-    void setUp() {
-        ChatLanguageModel chatModel =
-                GoogleAiGeminiChatModel.builder()
-                        .apiKey("REPLACE_YOUR_API_KEY_HERE")
-                        .modelName("gemini-1.5-flash")
-                        .logRequestsAndResponses(true)
-                        .build();
-        contextualPrecisionMetric =
-                ContextualPrecisionMetric.builder()
-                        .evaluatorLLM(chatModel)
-                        .objectMapper(new ObjectMapper())
-                        .build();
-    }
+  @BeforeEach
+  void setUp() {
+    ChatLanguageModel chatModel =
+        GoogleAiGeminiChatModel.builder()
+            .apiKey("REPLACE_YOUR_API_KEY_HERE")
+            .modelName("gemini-1.5-flash")
+            .logRequestsAndResponses(true)
+            .build();
+    contextualPrecisionMetric =
+        ContextualPrecisionMetric.builder()
+            .evaluatorLLM(chatModel)
+            .objectMapper(new ObjectMapper())
+            .build();
+  }
 
-    @Test
-    @Disabled("OpenAI and Gemini keys are not free")
-    void evaluate() {
-        EvaluationResult evaluationResult =
-                contextualPrecisionMetric.evaluate(
-                        EvaluationContext.builder()
-                                .userInput("What if these shoes don't fit?")
-                                .actualResponse("We offer a 30-day full refund at no extra cost.")
-                                .expectedResponse("You are eligible for a 30 day full refund at no extra cost")
-                                .retrievedContexts(
-                                        List.of(
-                                                "All customers are eligible for a 30 day full refund at no extra cost."))
-                                .build());
+  @Test
+  @Disabled("OpenAI and Gemini keys are not free")
+  void evaluate() {
+    EvaluationResult evaluationResult =
+        contextualPrecisionMetric.evaluate(
+            EvaluationContext.builder()
+                .userInput("What if these shoes don't fit?")
+                .actualResponse("We offer a 30-day full refund at no extra cost.")
+                .expectedResponse("You are eligible for a 30 day full refund at no extra cost")
+                .retrievedContexts(
+                    List.of(
+                        "All customers are eligible for a 30 day full refund at no extra cost."))
+                .build());
 
-        Assertions.assertEquals(1.0, evaluationResult.getScore());
-    }
+    Assertions.assertEquals(1.0, evaluationResult.getScore());
+  }
 }

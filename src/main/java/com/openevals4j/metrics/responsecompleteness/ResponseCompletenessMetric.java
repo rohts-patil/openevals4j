@@ -14,48 +14,48 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ResponseCompletenessMetric
-        extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
+    extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
 
-    private final String evaluationPrompt;
+  private final String evaluationPrompt;
 
-    @Builder
-    public ResponseCompletenessMetric(
-            ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper, String evaluationPrompt) {
-        super(MetricName.RESPONSE_COMPLETENESS, evaluatorLLM, objectMapper);
-        this.evaluationPrompt =
-                evaluationPrompt != null
-                        ? evaluationPrompt
-                        : ResponseCompletenessPromptConstants.RESPONSE_COMPLETENESS_EVALUATION_PROMPT;
+  @Builder
+  public ResponseCompletenessMetric(
+      ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper, String evaluationPrompt) {
+    super(MetricName.RESPONSE_COMPLETENESS, evaluatorLLM, objectMapper);
+    this.evaluationPrompt =
+        evaluationPrompt != null
+            ? evaluationPrompt
+            : ResponseCompletenessPromptConstants.RESPONSE_COMPLETENESS_EVALUATION_PROMPT;
+  }
+
+  @Override
+  public EvaluationResult evaluate(EvaluationContext evaluationContext) {
+    validateEvaluationContext(evaluationContext);
+
+    try {
+      String prompt =
+          String.format(
+              evaluationPrompt,
+              evaluationContext.getUserInput(),
+              evaluationContext.getExpectedResponse(),
+              evaluationContext.getActualResponse());
+
+      ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
+
+      return getObjectMapper().readValue(output.aiMessage().text(), EvaluationResult.class);
+
+    } catch (JsonProcessingException exception) {
+      log.error(
+          "Error occurred while evaluating response completeness metric for evaluation context {}",
+          evaluationContext,
+          exception);
     }
 
-    @Override
-    public EvaluationResult evaluate(EvaluationContext evaluationContext) {
-        validateEvaluationContext(evaluationContext);
+    return getDefaultEvaluationResult();
+  }
 
-        try {
-            String prompt =
-                    String.format(
-                            evaluationPrompt,
-                            evaluationContext.getUserInput(),
-                            evaluationContext.getExpectedResponse(),
-                            evaluationContext.getActualResponse());
-
-            ChatResponse output = getEvaluatorLLM().chat(buildChatRequest(prompt, getResponseFormat()));
-
-            return getObjectMapper().readValue(output.aiMessage().text(), EvaluationResult.class);
-
-        } catch (JsonProcessingException exception) {
-            log.error(
-                    "Error occurred while evaluating response completeness metric for evaluation context {}",
-                    evaluationContext,
-                    exception);
-        }
-
-        return getDefaultEvaluationResult();
-    }
-
-    @Override
-    protected List<String> getRequiredFieldsForValidation() {
-        return List.of("userInput", "expectedResponse", "actualResponse");
-    }
+  @Override
+  protected List<String> getRequiredFieldsForValidation() {
+    return List.of("userInput", "expectedResponse", "actualResponse");
+  }
 }
