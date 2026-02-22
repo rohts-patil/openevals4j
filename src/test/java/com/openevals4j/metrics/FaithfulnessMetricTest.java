@@ -21,7 +21,7 @@ class FaithfulnessMetricTest {
     ChatLanguageModel chatModel =
         GoogleAiGeminiChatModel.builder()
             .apiKey("REPLACE_YOUR_API_KEY_HERE")
-            .modelName("gemini-1.5-flash")
+            .modelName("gemini-2.5-flash")
             .logRequestsAndResponses(true)
             .build();
     faithfulnessMetric =

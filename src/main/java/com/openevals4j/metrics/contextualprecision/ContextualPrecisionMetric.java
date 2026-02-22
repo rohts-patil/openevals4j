@@ -4,15 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.Constants;
-import com.openevals4j.metrics.LLMBasedMetric;
 import com.openevals4j.metrics.MetricName;
+import com.openevals4j.metrics.VerdictBasedMetric;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
 import com.openevals4j.metrics.models.VerdictWithReason;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +19,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
+public class ContextualPrecisionMetric extends VerdictBasedMetric {
 
   private final String verdictGenerationPrompt;
   private final String reasonGenerationPrompt;
@@ -80,9 +78,10 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
     String prompt = String.format(reasonGenerationPrompt, score, input, retrievalContextsVerdicts);
 
-    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+    ChatResponse response =
+        getEvaluatorLLM().chat(buildChatRequest(prompt, getReasonResponseFormat()));
 
-    String content = res.content().text().replaceAll(Constants.REGEX, "");
+    String content = response.aiMessage().text();
 
     return extractReason(content);
   }
@@ -93,11 +92,14 @@ public class ContextualPrecisionMetric extends LLMBasedMetric<EvaluationContext,
 
     String prompt = getGenerateVerdictsPrompt(input, expectedOutput, retrievalContext);
 
-    Response<AiMessage> res = getEvaluatorLLM().generate(new UserMessage(prompt));
+    ChatResponse response =
+        getEvaluatorLLM().chat(buildChatRequest(prompt, getVerdictResponseFormat()));
 
-    String content = res.content().text().replaceAll(Constants.REGEX, "");
+    String content = response.aiMessage().text();
 
-    return getObjectMapper().readValue(content, new TypeReference<>() {});
+    Map<String, List<VerdictWithReason>> wrapper =
+        getObjectMapper().readValue(content, new TypeReference<>() {});
+    return wrapper.get("verdicts");
   }
 
   private String extractReason(String jsonString) throws JsonProcessingException {

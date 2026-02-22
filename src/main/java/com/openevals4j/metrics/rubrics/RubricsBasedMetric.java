@@ -2,8 +2,8 @@ package com.openevals4j.metrics.rubrics;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openevals4j.metrics.LLMBasedMetric;
 import com.openevals4j.metrics.MetricName;
+import com.openevals4j.metrics.ScoreBasedMetric;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
 import com.openevals4j.metrics.rubrics.models.CriterionScore;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-public class RubricsBasedMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
+public class RubricsBasedMetric extends ScoreBasedMetric {
 
   private final List<RubricCriterion> rubricCriteria;
   private final String evaluationPrompt;

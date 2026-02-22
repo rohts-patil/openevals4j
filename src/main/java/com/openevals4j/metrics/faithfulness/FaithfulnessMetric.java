@@ -2,8 +2,8 @@ package com.openevals4j.metrics.faithfulness;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openevals4j.metrics.LLMBasedMetric;
 import com.openevals4j.metrics.MetricName;
+import com.openevals4j.metrics.ScoreBasedMetric;
 import com.openevals4j.metrics.models.EvaluationContext;
 import com.openevals4j.metrics.models.EvaluationResult;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class FaithfulnessMetric extends LLMBasedMetric<EvaluationContext, EvaluationResult> {
+public class FaithfulnessMetric extends ScoreBasedMetric {
 
   public static final String FAITHFULNESS_EVALUATION_PROMPT =
       """

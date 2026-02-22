@@ -1,7 +1,5 @@
 package com.openevals4j.metrics;
 
-import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openevals4j.metrics.exception.EvaluationContextValidationException;
 import com.openevals4j.metrics.models.EvaluationContext;
@@ -12,11 +10,14 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchema;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * Base class for all LLM-based evaluation metrics. Provides generic LLM call infrastructure
+ * (building chat requests, validation, default results). Response format logic is delegated to
+ * intermediate subclasses ({@link ScoreBasedMetric}, {@link VerdictBasedMetric}).
+ */
 @Data
 public class LLMBasedMetric<K, V> implements Metric<K, V> {
 
@@ -26,14 +27,11 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
 
   private final ObjectMapper objectMapper;
 
-  private final ResponseFormat responseFormat;
-
   public LLMBasedMetric(
       MetricName metricName, ChatLanguageModel evaluatorLLM, ObjectMapper objectMapper) {
     this.metricName = metricName;
     this.evaluatorLLM = evaluatorLLM;
     this.objectMapper = objectMapper;
-    this.responseFormat = buildResponseFormatForScoreAndReasoning();
   }
 
   @Override
@@ -50,22 +48,6 @@ public class LLMBasedMetric<K, V> implements Metric<K, V> {
     return ChatRequest.builder()
         .responseFormat(responseFormat)
         .messages(UserMessage.from(prompt))
-        .build();
-  }
-
-  protected ResponseFormat buildResponseFormatForScoreAndReasoning() {
-    return ResponseFormat.builder()
-        .type(JSON)
-        .jsonSchema(
-            JsonSchema.builder()
-                .name("EvaluationResult")
-                .rootElement(
-                    JsonObjectSchema.builder()
-                        .addStringProperty("reasoning")
-                        .addNumberProperty("score")
-                        .required("reasoning", "score")
-                        .build())
-                .build())
         .build();
   }
 
